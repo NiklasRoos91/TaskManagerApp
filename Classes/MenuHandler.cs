@@ -15,9 +15,7 @@ namespace TaskManagerApp.Classes
         {
             while (true)
             {
-                //AnsiConsole.Write("Task Manager");
                 AnsiConsole.Write("Task Manager\n");
-
 
                 TaskManager.ShowTasks();
 
@@ -32,15 +30,27 @@ namespace TaskManagerApp.Classes
                     case "Lägg till uppgift":
                         TaskManager.AddTask();
                         break;
+                    case "Ändra uppgift":
+                        TaskManager.EditTask();
+                        break;
+                    case "Flytta uppgift":
+                        TaskManager.MoveTask();
+                        break;
+                    case "Ta bort uppgift":
+                        TaskManager.RemoveTask();
+                        break;                        
                     case "Avsluta":
-                        Console.WriteLine("[red]Avslutar...");
+                        AnsiConsole.MarkupLine("[red]Avslutar...[/]");
                         return;
                     default:
                         AnsiConsole.MarkupLine("[yellow]Funktionen är ännu inte implementerad![/]");
                         break;
                 }
+
+                Console.WriteLine("Tryck på valfri tangent för att fortsätta...");
+                Console.ReadKey();
+                Console.Clear();
             }
         }
-
     }
 }

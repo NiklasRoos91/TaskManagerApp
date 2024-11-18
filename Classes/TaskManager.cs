@@ -6,11 +6,14 @@ namespace TaskManagerApp.Classes
 {
     public class TaskManager
     {
+        public JSONHandler JSONHandler { get; set; }
         public List<Task> taskList { get; set; } = new List<Task>();
 
         public TaskManager()
         {
-            new List<Task>();
+            JSONHandler = new JSONHandler();
+            JSONHandler.LoadDataFromFile();
+            taskList = JSONHandler.AllTasksFromJSON;
         }
 
         public void AddTask()
@@ -20,15 +23,7 @@ namespace TaskManagerApp.Classes
 
             while (string.IsNullOrWhiteSpace(newTitle))
             {
-                newTitle = AnsiConsole.Ask<string>("Skriv in titeln på din nya uppgift:");
-
-                Console.WriteLine($"Debug: Title entered: '{newTitle}'");
-
-
-                if (string.IsNullOrWhiteSpace(newTitle))
-                {
-                    AnsiConsole.MarkupLine("[red]Inmatningen får inte vara tom. Vänligen ange ett giltigt värde.[/]");
-                }
+                newTitle = GetValidInput("Skriv in titeln på din nya uppgift:");
             }
 
             string newDescription = AnsiConsole.Prompt(
@@ -38,13 +33,7 @@ namespace TaskManagerApp.Classes
 
             if (newDescription == "Ja")
             {
-                newDescription = AnsiConsole.Ask<string>("Skriv in den detaljerade beskrivningen på uppgiften: ");
-
-                while (string.IsNullOrWhiteSpace(newDescription))
-                {
-                    AnsiConsole.MarkupLine("[red]Inmatningen får inte vara tom. Vänligen ange ett giltigt värde.[/]");
-                    newDescription = AnsiConsole.Ask<string>("Skriv in den detaljerade beskrivningen på uppgiften: ");
-                }
+                newDescription = GetValidInput("Skriv in den detaljerade beskrivningen på uppgiften: ");
             }
             else
             {
@@ -60,17 +49,82 @@ namespace TaskManagerApp.Classes
         {
             if (taskList.Count > 0)
             {
-                Console.WriteLine("Uppgifter:");
-                
+                AnsiConsole.MarkupLine("Uppgifter:");
+
                 foreach (var task in taskList)
                 {
-                    Console.WriteLine(task.Title);
+                    AnsiConsole.MarkupLine($"{task.Title} - {task.Description}");
                 }
             }
             else
             {
-                Console.WriteLine("Tom lista");
+                AnsiConsole.MarkupLine("[red]Inga uppgifter finns.[/]");
             }
+        }
+
+        public void EditTask()
+        {
+            string taskToEdit = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Vilken uppgift vill du ändra?")
+                    .AddChoices(taskList.Select(task => task.Title).ToArray()));
+
+            var selectedTask = taskList.FirstOrDefault(task => task.Title == taskToEdit);
+
+            if (selectedTask != null)
+            {
+                string newTitle = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("Vill du ändra titeln:")
+                        .AddChoices(new[] { "Ja", "Nej" }));
+
+                if (newTitle == "Ja")
+                {
+                    newTitle = GetValidInput("Skriv in den nya titeln på uppgiften: ");
+
+                    selectedTask.Title = newTitle;
+                }
+
+                string newDescription = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                    .Title("Vill du ändra den detaljerad beskrivning av uppgiften:")
+                    .AddChoices(new[] { "Ja", "Nej" }));
+
+                if (newDescription == "Ja")
+                {
+                    newDescription = GetValidInput("Skriv in den nya beskrivningen för uppgiften: ");
+
+                    selectedTask.Description = newDescription;
+                }
+
+                AnsiConsole.MarkupLine("[green]Uppgiften har uppdaterats.[/]");
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
+            }
+        }
+
+        private string GetValidInput(string prompt)
+        {
+            while (true)
+            {
+            string input = AnsiConsole.Ask<string>(prompt);
+
+                if (!string.IsNullOrWhiteSpace(input))
+                {
+                    return input;
+                }
+                Console.WriteLine("Inmatningen får inte vara tom eller endast innehålla mellanslag. Vänligen försök igen.");
+            }
+        }
+
+        public void MoveTask()
+        {
+
+        }
+
+        public void RemoveTask() { 
         }
     }
 }
