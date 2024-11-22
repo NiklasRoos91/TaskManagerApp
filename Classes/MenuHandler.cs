@@ -22,7 +22,7 @@ namespace TaskManagerApp.Classes
                 var userChoice = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
                     .Title("[green]Välj ett alternativ:[/]")
-                    .AddChoices("Lägg till uppgift", "Ändra uppgift", "Flytta uppgift", "Ta bort uppgift", "Avsluta")
+                    .AddChoices("Lägg till uppgift", "Ändra uppgift", "Flytta uppgift", "Ta bort uppgift", "Spara och avsluta")
                 );
 
                 switch (userChoice)
@@ -37,10 +37,13 @@ namespace TaskManagerApp.Classes
                         TaskManager.MoveTask();
                         break;
                     case "Ta bort uppgift":
-                        TaskManager.RemoveTask();
+                        TaskManager.DeleteTask();
                         break;                        
-                    case "Avsluta":
+                    case "Spara och avsluta":
+                        TaskManager.JSONHandler.SaveData();
+                        AnsiConsole.MarkupLine("[yellow]Sparar...[/]");
                         AnsiConsole.MarkupLine("[red]Avslutar...[/]");
+                        TaskManager.JSONHandler.SaveData();
                         return;
                     default:
                         AnsiConsole.MarkupLine("[yellow]Funktionen är ännu inte implementerad![/]");

@@ -115,16 +115,79 @@ namespace TaskManagerApp.Classes
                 {
                     return input;
                 }
-                Console.WriteLine("Inmatningen får inte vara tom eller endast innehålla mellanslag. Vänligen försök igen.");
+                AnsiConsole.MarkupLine("[red]Inmatningen får inte vara tom eller endast innehålla mellanslag. Vänligen försök igen.[/]");
             }
         }
 
         public void MoveTask()
         {
+            if (taskList.Count < 2)
+            {
+                AnsiConsole.MarkupLine("[red]Det finns inte tillräckligt många uppgifter för att flytta.[/]");
+                return;
+            }
 
+            string taskToMove = AnsiConsole.Prompt(
+                new SelectionPrompt<String>()
+                .Title("Vilken uppgift vill du flytta?")
+                .AddChoices(taskList.Select(task => task.Title).ToArray()));
+
+            var selectedTask = taskList.FirstOrDefault(task => task.Title == taskToMove);
+
+            if (selectedTask == null)
+            {
+                AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
+                return;
+            }
+
+
+            if (selectedTask != null)
+            {
+                string whereToMoveTask = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                    .Title("Välj uppgiften som ska ligga före den flyttade uppgiften (eller välj första platsen)")
+                    .AddChoices(taskList.Select(task => task.Title).ToArray().Prepend("(Första Platsen)").ToList()));
+
+
+
+                taskList.Remove(selectedTask);
+
+                if (whereToMoveTask == "(Första platsen)")
+                {
+                    taskList.Insert(0, selectedTask);
+                }
+                else
+                {
+                    int targetIndex = taskList.FindIndex(task => task.Title == whereToMoveTask);
+                    taskList.Insert(targetIndex + 1, selectedTask);
+                }
+                AnsiConsole.MarkupLine($"[green]Uppgiften har flyttats.[/]");
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
+            }
         }
 
-        public void RemoveTask() { 
+        public void DeleteTask()
+        {
+            string taskToDelete = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Vilken uppgift vill du ta bort?")
+                    .AddChoices(taskList.Select(task => task.Title).ToArray()));
+
+            var selectedTask = taskList.FirstOrDefault(task => task.Title == taskToDelete);
+
+            if (selectedTask != null)
+            {
+                taskList.Remove(selectedTask);
+                AnsiConsole.MarkupLine("[green] Uppgiften har raderats.[]");
+
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
+            }
         }
     }
 }
