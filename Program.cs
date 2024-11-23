@@ -6,6 +6,8 @@ namespace TaskManagerApp
     {
         static void Main(string[] args)
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+
             MenuHandler menuHandler = new MenuHandler();
 
             menuHandler.MainMenu();

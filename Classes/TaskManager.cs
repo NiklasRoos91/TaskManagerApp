@@ -51,7 +51,9 @@ namespace TaskManagerApp.Classes
 
                 foreach (var task in taskList)
                 {
-                    AnsiConsole.MarkupLine($"{task.Title} - {task.Description}");
+                    var checkbox = task.IsCompleted ? "[green]✔[/]" : "[red]✘[/]";
+
+                    AnsiConsole.MarkupLine($"{checkbox} {task.Title} - {task.Description}");
                 }
             }
             else
@@ -194,6 +196,21 @@ namespace TaskManagerApp.Classes
                 .AddChoices(new[] { "Ja", "Nej" }));
 
             return userChoiceYesOrNo == "Ja";
+        }
+
+        public void MarkTaskAsComleted()
+        {
+            Task selectedTask = SelectTask("Vilken uppgift vill du markera som slutförd?");
+
+            if (selectedTask != null)
+            {
+                selectedTask.IsCompleted = true;
+                AnsiConsole.MarkupLine($"[green]Uppgiften '{selectedTask.Title}' är nu markerad som slutförd.[/]");
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
+            }
         }
     }
 }

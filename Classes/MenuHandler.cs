@@ -22,13 +22,16 @@ namespace TaskManagerApp.Classes
                 var userChoice = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
                     .Title("[green]Välj ett alternativ:[/]")
-                    .AddChoices("Lägg till uppgift", "Ändra uppgift", "Flytta uppgift", "Ta bort uppgift", "Avsluta")
+                    .AddChoices("Lägg till uppgift", "Markera uppgift som slutförd",  "Ändra uppgift", "Flytta uppgift", "Ta bort uppgift", "Avsluta")
                 );
 
                 switch (userChoice)
                 {
                     case "Lägg till uppgift":
                         TaskManager.AddTask();
+                        break;
+                    case "Markera uppgift som slutförd":
+                        TaskManager.MarkTaskAsComleted(); 
                         break;
                     case "Ändra uppgift":
                         TaskManager.EditTask();
