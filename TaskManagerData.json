@@ -3,27 +3,32 @@
     {
       "Title": "Gör kaffe",
       "Description": "Brygg kaffe för kontoret",
-      "ID": "3f4aaf9a-9d80-4d5d-b11d-e5013a9c5c35"
+      "ID": "3f4aaf9a-9d80-4d5d-b11d-e5013a9c5c35",
+      "IsCompleted": false
     },
     {
       "Title": "Skriva rapport",
       "Description": "Skriva månatlig rapport om projektstatus",
-      "ID": "a9d65ab9-bb9c-4d4f-9e96-d4368a34e42f"
+      "ID": "a9d65ab9-bb9c-4d4f-9e96-d4368a34e42f",
+      "IsCompleted": false
     },
     {
       "Title": "Koda i C#",
       "Description": "Jobba med uppgifter för C#-programmet",
-      "ID": "e3e3c69d-d8ab-47f9-906e-f413a96b2f09"
+      "ID": "e3e3c69d-d8ab-47f9-906e-f413a96b2f09",
+      "IsCompleted": false
     },
     {
       "Title": "Städa kontoret",
       "Description": "Torka skrivbord, dammsug golvet",
-      "ID": "d08db7b4-e3bb-4c8e-a91a-63d506e97a62"
+      "ID": "d08db7b4-e3bb-4c8e-a91a-63d506e97a62",
+      "IsCompleted": false
     },
     {
       "Title": "E-posta kund",
       "Description": "Skicka e-post med uppdatering om leverans",
-      "ID": "a4cc5033-91a3-4c3d-9b3a-1ab6f8a1b0a0"
+      "ID": "a4cc5033-91a3-4c3d-9b3a-1ab6f8a1b0a0",
+      "IsCompleted": false
     }
   ]
 }

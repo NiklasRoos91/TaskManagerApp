@@ -18,7 +18,6 @@ namespace TaskManagerApp.Classes
 
         public void AddTask()
         {
-
             string newTitle = "";
 
             while (string.IsNullOrWhiteSpace(newTitle))
@@ -26,12 +25,11 @@ namespace TaskManagerApp.Classes
                 newTitle = GetValidInput("Skriv in titeln på din nya uppgift:");
             }
 
-            string newDescription = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                       .Title("Vill du lägga till en detaljerad beskrivning av uppgiften:")
-                    .AddChoices(new[] { "Ja", "Nej" }));
+            string newDescription;
 
-            if (newDescription == "Ja")
+            bool doesUserWantToAddDescription = AskUserForYesOrNo("Vill du lägga till en detaljerad beskrivning av uppgiften:");
+
+            if (doesUserWantToAddDescription)
             {
                 newDescription = GetValidInput("Skriv in den detaljerade beskrivningen på uppgiften: ");
             }
@@ -64,33 +62,24 @@ namespace TaskManagerApp.Classes
 
         public void EditTask()
         {
-            string taskToEdit = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("Vilken uppgift vill du ändra?")
-                    .AddChoices(taskList.Select(task => task.Title).ToArray()));
-
-            var selectedTask = taskList.FirstOrDefault(task => task.Title == taskToEdit);
+            Task selectedTask = SelectTask("Vilken uppgift vill du ändra?");
 
             if (selectedTask != null)
             {
-                string newTitle = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
-                        .Title("Vill du ändra titeln:")
-                        .AddChoices(new[] { "Ja", "Nej" }));
+                string newTitle;
+                bool doesUserWantToChangeTitle = AskUserForYesOrNo("Vill du ändra titeln:");
 
-                if (newTitle == "Ja")
+                if (doesUserWantToChangeTitle)
                 {
                     newTitle = GetValidInput("Skriv in den nya titeln på uppgiften: ");
 
                     selectedTask.Title = newTitle;
                 }
 
-                string newDescription = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
-                    .Title("Vill du ändra den detaljerad beskrivning av uppgiften:")
-                    .AddChoices(new[] { "Ja", "Nej" }));
+                string newDescription;
+                bool doesUserWantToChangeDescription = AskUserForYesOrNo("Vill du ändra den detaljerad beskrivning av uppgiften:");
 
-                if (newDescription == "Ja")
+                if (doesUserWantToChangeDescription)
                 {
                     newDescription = GetValidInput("Skriv in den nya beskrivningen för uppgiften: ");
 
@@ -127,32 +116,21 @@ namespace TaskManagerApp.Classes
                 return;
             }
 
-            string taskToMove = AnsiConsole.Prompt(
-                new SelectionPrompt<String>()
-                .Title("Vilken uppgift vill du flytta?")
-                .AddChoices(taskList.Select(task => task.Title).ToArray()));
-
-            var selectedTask = taskList.FirstOrDefault(task => task.Title == taskToMove);
-
-            if (selectedTask == null)
-            {
-                AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
-                return;
-            }
-
+            Task selectedTask = SelectTask("Vilken uppgift vill du flytta?");
 
             if (selectedTask != null)
             {
+                const string FirstPosition = "(Första Platsen)";
+
                 string whereToMoveTask = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
                     .Title("Välj uppgiften som ska ligga före den flyttade uppgiften (eller välj första platsen)")
-                    .AddChoices(taskList.Select(task => task.Title).ToArray().Prepend("(Första Platsen)").ToList()));
+                    .AddChoices(taskList.Select(task => task.Title).ToArray().Prepend(FirstPosition).ToList()));
 
+                int currentIndex = taskList.IndexOf(selectedTask);
+                taskList.RemoveAt(currentIndex);
 
-
-                taskList.Remove(selectedTask);
-
-                if (whereToMoveTask == "(Första platsen)")
+                if (whereToMoveTask == FirstPosition)
                 {
                     taskList.Insert(0, selectedTask);
                 }
@@ -171,23 +149,51 @@ namespace TaskManagerApp.Classes
 
         public void DeleteTask()
         {
-            string taskToDelete = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("Vilken uppgift vill du ta bort?")
-                    .AddChoices(taskList.Select(task => task.Title).ToArray()));
-
-            var selectedTask = taskList.FirstOrDefault(task => task.Title == taskToDelete);
+            Task selectedTask = SelectTask("Vilken uppgift vill du ta bort?");
 
             if (selectedTask != null)
             {
                 taskList.Remove(selectedTask);
-                AnsiConsole.MarkupLine("[green] Uppgiften har raderats.[]");
-
+                AnsiConsole.MarkupLine("[green] Uppgiften har raderats.[/]");
             }
             else
             {
-                AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
+                AnsiConsole.MarkupLine("[red]Ingen uppgift valdes.[/]");
             }
+        }
+
+        public Task SelectTask(string prompt)
+        {
+            if (taskList == null || taskList.Count == 0)
+            {
+                AnsiConsole.MarkupLine("[red]Det finns inga uppgifter att välja.[/]");
+                return null;
+            }
+
+            string taskToSelect = AnsiConsole.Prompt(
+                new SelectionPrompt<String>()
+                .Title(prompt)
+                .AddChoices(taskList.Select(task => task.Title).ToArray()));
+
+            Task selectedTask = taskList.FirstOrDefault(task => task.Title == taskToSelect)!;
+
+            if (selectedTask == null)
+            {
+                AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
+                return null;
+            }
+
+            return selectedTask;
+        }
+
+        public bool AskUserForYesOrNo(string yesOrNoPrompt)
+        {
+                string userChoiceYesOrNo = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                .Title(yesOrNoPrompt)
+                .AddChoices(new[] { "Ja", "Nej" }));
+
+            return userChoiceYesOrNo == "Ja";
         }
     }
 }
