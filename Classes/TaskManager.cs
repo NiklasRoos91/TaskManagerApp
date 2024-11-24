@@ -18,198 +18,264 @@ namespace TaskManagerApp.Classes
 
         public void AddTask()
         {
-            string newTitle = "";
-
-            while (string.IsNullOrWhiteSpace(newTitle))
+            try
             {
-                newTitle = GetValidInput("Skriv in titeln på din nya uppgift:");
+                string newTitle = "";
+
+                while (string.IsNullOrWhiteSpace(newTitle))
+                {
+                    newTitle = GetValidInput("Skriv in titeln på din nya uppgift:");
+                }
+
+                string newDescription;
+
+                bool doesUserWantToAddDescription = AskUserForYesOrNo("Vill du lägga till en detaljerad beskrivning av uppgiften:");
+
+                if (doesUserWantToAddDescription)
+                {
+                    newDescription = GetValidInput("Skriv in den detaljerade beskrivningen på uppgiften: ");
+                }
+                else
+                {
+                    newDescription = "Ingen beskrivning tillagd";
+                }
+
+                Guid newID = Guid.NewGuid();
+
+                taskList.Add(new Task(newTitle, newDescription, newID));
             }
-
-            string newDescription;
-
-            bool doesUserWantToAddDescription = AskUserForYesOrNo("Vill du lägga till en detaljerad beskrivning av uppgiften:");
-
-            if (doesUserWantToAddDescription)
+            catch (Exception ex)
             {
-                newDescription = GetValidInput("Skriv in den detaljerade beskrivningen på uppgiften: ");
+                AnsiConsole.MarkupLine($"[red]Fel vid tillägg av uppgift: {ex.Message}[/]");
             }
-            else
-            {
-                newDescription = "Ingen beskrivning tillagd";
-            }
-
-            Guid newID = Guid.NewGuid();
-
-            taskList.Add(new Task(newTitle, newDescription, newID));
         }
 
         public void ShowTasks()
         {
-            if (taskList.Count > 0)
+            try
             {
-                AnsiConsole.MarkupLine("Uppgifter:");
-
-                foreach (var task in taskList)
+                if (taskList.Count > 0)
                 {
-                    var checkbox = task.IsCompleted ? "[green]✔[/]" : "[red]✘[/]";
+                    AnsiConsole.MarkupLine("Uppgifter:");
 
-                    AnsiConsole.MarkupLine($"{checkbox} {task.Title} - {task.Description}");
+                    foreach (var task in taskList)
+                    {
+                        var checkbox = task.IsCompleted ? "[green]✔[/]" : "[red]✘[/]";
+
+                        AnsiConsole.MarkupLine($"{checkbox} {task.Title} - {task.Description}");
+                    }
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine("[red]Inga uppgifter finns.[/]");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                AnsiConsole.MarkupLine("[red]Inga uppgifter finns.[/]");
+                AnsiConsole.MarkupLine($"[red]Fel vid visning av uppgifter: {ex.Message}[/]");
             }
         }
 
         public void EditTask()
         {
-            Task selectedTask = SelectTask("Vilken uppgift vill du ändra?");
-
-            if (selectedTask != null)
+            try
             {
-                string newTitle;
-                bool doesUserWantToChangeTitle = AskUserForYesOrNo("Vill du ändra titeln:");
+                Task selectedTask = SelectTask("Vilken uppgift vill du ändra?");
 
-                if (doesUserWantToChangeTitle)
+                if (selectedTask != null)
                 {
-                    newTitle = GetValidInput("Skriv in den nya titeln på uppgiften: ");
+                    string newTitle;
+                    bool doesUserWantToChangeTitle = AskUserForYesOrNo("Vill du ändra titeln:");
 
-                    selectedTask.Title = newTitle;
+                    if (doesUserWantToChangeTitle)
+                    {
+                        newTitle = GetValidInput("Skriv in den nya titeln på uppgiften: ");
+
+                        selectedTask.Title = newTitle;
+                    }
+
+                    string newDescription;
+                    bool doesUserWantToChangeDescription = AskUserForYesOrNo("Vill du ändra den detaljerad beskrivning av uppgiften:");
+
+                    if (doesUserWantToChangeDescription)
+                    {
+                        newDescription = GetValidInput("Skriv in den nya beskrivningen för uppgiften: ");
+
+                        selectedTask.Description = newDescription;
+                    }
+
+                    AnsiConsole.MarkupLine("[green]Uppgiften har uppdaterats.[/]");
                 }
-
-                string newDescription;
-                bool doesUserWantToChangeDescription = AskUserForYesOrNo("Vill du ändra den detaljerad beskrivning av uppgiften:");
-
-                if (doesUserWantToChangeDescription)
+                else
                 {
-                    newDescription = GetValidInput("Skriv in den nya beskrivningen för uppgiften: ");
-
-                    selectedTask.Description = newDescription;
+                    AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
                 }
-
-                AnsiConsole.MarkupLine("[green]Uppgiften har uppdaterats.[/]");
             }
-            else
+            catch (Exception ex)
             {
-                AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
+                AnsiConsole.MarkupLine($"[red]Fel vid ändring av uppgift: {ex.Message}[/]");
             }
         }
 
         private string GetValidInput(string prompt)
         {
-            while (true)
+            try
             {
-            string input = AnsiConsole.Ask<string>(prompt);
-
-                if (!string.IsNullOrWhiteSpace(input))
+                while (true)
                 {
-                    return input;
+                    string input = AnsiConsole.Ask<string>(prompt);
+
+                    if (!string.IsNullOrWhiteSpace(input))
+                    {
+                        return input;
+                    }
+                    AnsiConsole.MarkupLine("[red]Inmatningen får inte vara tom eller endast innehålla mellanslag. Vänligen försök igen.[/]");
                 }
-                AnsiConsole.MarkupLine("[red]Inmatningen får inte vara tom eller endast innehålla mellanslag. Vänligen försök igen.[/]");
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Fel vid inmatning: {ex.Message}[/]");
+                return string.Empty;
             }
         }
 
         public void MoveTask()
         {
-            if (taskList.Count < 2)
+            try
             {
-                AnsiConsole.MarkupLine("[red]Det finns inte tillräckligt många uppgifter för att flytta.[/]");
-                return;
-            }
-
-            Task selectedTask = SelectTask("Vilken uppgift vill du flytta?");
-
-            if (selectedTask != null)
-            {
-                const string FirstPosition = "(Första Platsen)";
-
-                string whereToMoveTask = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
-                    .Title("Välj uppgiften som ska ligga före den flyttade uppgiften (eller välj första platsen)")
-                    .AddChoices(taskList.Select(task => task.Title).ToArray().Prepend(FirstPosition).ToList()));
-
-                int currentIndex = taskList.IndexOf(selectedTask);
-                taskList.RemoveAt(currentIndex);
-
-                if (whereToMoveTask == FirstPosition)
+                if (taskList.Count < 2)
                 {
-                    taskList.Insert(0, selectedTask);
+                    AnsiConsole.MarkupLine("[red]Det finns inte tillräckligt många uppgifter för att flytta.[/]");
+                    return;
+                }
+
+                Task selectedTask = SelectTask("Vilken uppgift vill du flytta?");
+
+                if (selectedTask != null)
+                {
+                    const string FirstPosition = "(Första Platsen)";
+
+                    string whereToMoveTask = AnsiConsole.Prompt(
+                        new SelectionPrompt<string>()
+                        .Title("Välj uppgiften som ska ligga före den flyttade uppgiften (eller välj första platsen)")
+                        .AddChoices(taskList.Select(task => task.Title).ToArray().Prepend(FirstPosition).ToList()));
+
+                    int currentIndex = taskList.IndexOf(selectedTask);
+                    taskList.RemoveAt(currentIndex);
+
+                    if (whereToMoveTask == FirstPosition)
+                    {
+                        taskList.Insert(0, selectedTask);
+                    }
+                    else
+                    {
+                        int targetIndex = taskList.FindIndex(task => task.Title == whereToMoveTask);
+                        taskList.Insert(targetIndex + 1, selectedTask);
+                    }
+                    AnsiConsole.MarkupLine($"[green]Uppgiften har flyttats.[/]");
                 }
                 else
                 {
-                    int targetIndex = taskList.FindIndex(task => task.Title == whereToMoveTask);
-                    taskList.Insert(targetIndex + 1, selectedTask);
+                    AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
                 }
-                AnsiConsole.MarkupLine($"[green]Uppgiften har flyttats.[/]");
             }
-            else
+            catch (Exception ex)
             {
-                AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
+                AnsiConsole.MarkupLine($"[red]Fel vid flytt av uppgift: {ex.Message}[/]");
             }
         }
 
         public void DeleteTask()
         {
-            Task selectedTask = SelectTask("Vilken uppgift vill du ta bort?");
+            try
+            {
+                Task selectedTask = SelectTask("Vilken uppgift vill du ta bort?");
 
-            if (selectedTask != null)
-            {
-                taskList.Remove(selectedTask);
-                AnsiConsole.MarkupLine("[green] Uppgiften har raderats.[/]");
+                if (selectedTask != null)
+                {
+                    taskList.Remove(selectedTask);
+                    AnsiConsole.MarkupLine("[green] Uppgiften har raderats.[/]");
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine("[red]Ingen uppgift valdes.[/]");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                AnsiConsole.MarkupLine("[red]Ingen uppgift valdes.[/]");
+                AnsiConsole.MarkupLine($"[red]Fel vid radering av uppgift: {ex.Message}[/]");
             }
         }
 
         public Task SelectTask(string prompt)
         {
-            if (taskList == null || taskList.Count == 0)
+            try
             {
-                AnsiConsole.MarkupLine("[red]Det finns inga uppgifter att välja.[/]");
+                if (taskList == null || taskList.Count == 0)
+                {
+                    AnsiConsole.MarkupLine("[red]Det finns inga uppgifter att välja.[/]");
+                    return null;
+                }
+
+                string taskToSelect = AnsiConsole.Prompt(
+                    new SelectionPrompt<String>()
+                    .Title(prompt)
+                    .AddChoices(taskList.Select(task => task.Title).ToArray()));
+
+                Task selectedTask = taskList.FirstOrDefault(task => task.Title == taskToSelect)!;
+
+                if (selectedTask == null)
+                {
+                    AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
+                    return null;
+                }
+
+                return selectedTask;
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Fel vid val av uppgift: {ex.Message}[/]");
                 return null;
             }
-
-            string taskToSelect = AnsiConsole.Prompt(
-                new SelectionPrompt<String>()
-                .Title(prompt)
-                .AddChoices(taskList.Select(task => task.Title).ToArray()));
-
-            Task selectedTask = taskList.FirstOrDefault(task => task.Title == taskToSelect)!;
-
-            if (selectedTask == null)
-            {
-                AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
-                return null;
-            }
-
-            return selectedTask;
         }
 
         public bool AskUserForYesOrNo(string yesOrNoPrompt)
         {
+            try
+            {
                 string userChoiceYesOrNo = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                 .Title(yesOrNoPrompt)
                 .AddChoices(new[] { "Ja", "Nej" }));
 
-            return userChoiceYesOrNo == "Ja";
+                return userChoiceYesOrNo == "Ja";
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Fel vid fråga om ja/nej: {ex.Message}[/]");
+                return false;
+            }
         }
 
         public void MarkTaskAsComleted()
         {
-            Task selectedTask = SelectTask("Vilken uppgift vill du markera som slutförd?");
+            try
+            {
+                Task selectedTask = SelectTask("Vilken uppgift vill du markera som slutförd?");
 
-            if (selectedTask != null)
-            {
-                selectedTask.IsCompleted = true;
-                AnsiConsole.MarkupLine($"[green]Uppgiften '{selectedTask.Title}' är nu markerad som slutförd.[/]");
+                if (selectedTask != null)
+                {
+                    selectedTask.IsCompleted = true;
+                    AnsiConsole.MarkupLine($"[green]Uppgiften '{selectedTask.Title}' är nu markerad som slutförd.[/]");
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
+                AnsiConsole.MarkupLine($"[red]Fel vid markering av uppgift som slutförd: {ex.Message}[/]");
             }
         }
     }
