@@ -50,38 +50,10 @@ namespace TaskManagerApp.Classes
             }
         }
 
-        public void ShowTasks()
+        public void EditTask(Task selectedTask)
         {
             try
             {
-                if (taskList.Count > 0)
-                {
-                    AnsiConsole.MarkupLine("Uppgifter:");
-
-                    foreach (var task in taskList)
-                    {
-                        var checkbox = task.IsCompleted ? "[green]✔[/]" : "[red]✘[/]";
-
-                        AnsiConsole.MarkupLine($"{checkbox} {task.Title} - {task.Description}");
-                    }
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine("[red]Inga uppgifter finns.[/]");
-                }
-            }
-            catch (Exception ex)
-            {
-                AnsiConsole.MarkupLine($"[red]Fel vid visning av uppgifter: {ex.Message}[/]");
-            }
-        }
-
-        public void EditTask()
-        {
-            try
-            {
-                Task selectedTask = SelectTask("Vilken uppgift vill du ändra?");
-
                 if (selectedTask != null)
                 {
                     string newTitle;
@@ -139,7 +111,7 @@ namespace TaskManagerApp.Classes
             }
         }
 
-        public void MoveTask()
+        public void MoveTask(Task selectedTask)
         {
             try
             {
@@ -148,8 +120,6 @@ namespace TaskManagerApp.Classes
                     AnsiConsole.MarkupLine("[red]Det finns inte tillräckligt många uppgifter för att flytta.[/]");
                     return;
                 }
-
-                Task selectedTask = SelectTask("Vilken uppgift vill du flytta?");
 
                 if (selectedTask != null)
                 {
@@ -184,17 +154,18 @@ namespace TaskManagerApp.Classes
                 AnsiConsole.MarkupLine($"[red]Fel vid flytt av uppgift: {ex.Message}[/]");
             }
         }
-
-        public void DeleteTask()
+        public void DeleteTask(Task selectedTask)
         {
             try
             {
-                Task selectedTask = SelectTask("Vilken uppgift vill du ta bort?");
-
                 if (selectedTask != null)
                 {
-                    taskList.Remove(selectedTask);
-                    AnsiConsole.MarkupLine("[green] Uppgiften har raderats.[/]");
+                    bool confirmDelete = AskUserForYesOrNo($"Är du säker på att du vill ta bort uppgiften '{selectedTask.Title}'?");
+                    if (confirmDelete)
+                    {
+                        taskList.Remove(selectedTask);
+                        AnsiConsole.MarkupLine("[green] Uppgiften har raderats.[/]");
+                    }
                 }
                 else
                 {
@@ -207,38 +178,25 @@ namespace TaskManagerApp.Classes
             }
         }
 
-        public Task SelectTask(string prompt)
+        public void MarkTaskAsComleted(Task selectedTask)
         {
             try
             {
-                if (taskList == null || taskList.Count == 0)
+                if (selectedTask != null)
                 {
-                    AnsiConsole.MarkupLine("[red]Det finns inga uppgifter att välja.[/]");
-                    return null;
+                    selectedTask.IsCompleted = true;
+                    AnsiConsole.MarkupLine($"[green]Uppgiften '{selectedTask.Title}' är nu markerad som slutförd.[/]");
                 }
-
-                string taskToSelect = AnsiConsole.Prompt(
-                    new SelectionPrompt<String>()
-                    .Title(prompt)
-                    .AddChoices(taskList.Select(task => task.Title).ToArray()));
-
-                Task selectedTask = taskList.FirstOrDefault(task => task.Title == taskToSelect)!;
-
-                if (selectedTask == null)
+                else
                 {
                     AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
-                    return null;
                 }
-
-                return selectedTask;
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"[red]Fel vid val av uppgift: {ex.Message}[/]");
-                return null;
+                AnsiConsole.MarkupLine($"[red]Fel vid markering av uppgift som slutförd: {ex.Message}[/]");
             }
         }
-
         public bool AskUserForYesOrNo(string yesOrNoPrompt)
         {
             try
@@ -254,28 +212,6 @@ namespace TaskManagerApp.Classes
             {
                 AnsiConsole.MarkupLine($"[red]Fel vid fråga om ja/nej: {ex.Message}[/]");
                 return false;
-            }
-        }
-
-        public void MarkTaskAsComleted()
-        {
-            try
-            {
-                Task selectedTask = SelectTask("Vilken uppgift vill du markera som slutförd?");
-
-                if (selectedTask != null)
-                {
-                    selectedTask.IsCompleted = true;
-                    AnsiConsole.MarkupLine($"[green]Uppgiften '{selectedTask.Title}' är nu markerad som slutförd.[/]");
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine("[red]Den valda uppgiften kunde inte hittas.[/]");
-                }
-            }
-            catch (Exception ex)
-            {
-                AnsiConsole.MarkupLine($"[red]Fel vid markering av uppgift som slutförd: {ex.Message}[/]");
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Security.Cryptography.X509Certificates;
 using Spectre.Console;
 
 namespace TaskManagerApp.Classes
@@ -11,49 +12,126 @@ namespace TaskManagerApp.Classes
         {
             TaskManager = new TaskManager();
         }
+        //public void MainMenu()
+        //{
+        //    while (true)
+        //    {
+        //        AnsiConsole.Write("Task Manager\n");
+
+        //        TaskManager.ShowTasks();
+
+        //        var userChoice = AnsiConsole.Prompt(
+        //            new SelectionPrompt<string>()
+        //            .Title("[green]Välj ett alternativ:[/]")
+        //            .AddChoices("Lägg till uppgift", "Markera uppgift som slutförd", "Ändra uppgift", "Flytta uppgift", "Ta bort uppgift", "Avsluta")
+        //        );
+
+        //        switch (userChoice)
+        //        {
+        //            case "Lägg till uppgift":
+        //                TaskManager.AddTask();
+        //                break;
+        //            case "Markera uppgift som slutförd":
+        //                TaskManager.MarkTaskAsComleted();
+        //                break;
+        //            case "Ändra uppgift":
+        //                TaskManager.EditTask();
+        //                break;
+        //            case "Flytta uppgift":
+        //                TaskManager.MoveTask();
+        //                break;
+        //            case "Ta bort uppgift":
+        //                TaskManager.DeleteTask();
+        //                break;
+        //            case "Avsluta":
+        //                AnsiConsole.MarkupLine("[red]Avslutar...[/]");
+        //                return;
+        //            default:
+        //                AnsiConsole.MarkupLine("[yellow]Funktionen är ännu inte implementerad![/]");
+        //                break;
+        //        }
+
+        //        TaskManager.JSONHandler.SaveData();
+        //        Console.WriteLine("Tryck på valfri tangent för att fortsätta...");
+        //        Console.ReadKey();
+        //        Console.Clear();
+        //    }
+        //}
+
         public void MainMenu()
         {
             while (true)
             {
                 AnsiConsole.Write("Task Manager\n");
 
-                TaskManager.ShowTasks();
+                var menuChoices = new List<string> { "Lägg till en uppgift" };
+
+                menuChoices.AddRange(TaskManager.taskList.Select(task =>
+                    $"{(task.IsCompleted ? "[green]✔[/]" : "[red]✘[/]")} {task.Title}: {task.Description}"));
+
+                if (TaskManager.taskList.Count == 0)
+                {
+                    AnsiConsole.MarkupLine("[yellow]Inga uppgifter att visa. Lägg till en uppgift för att komma igång![/]");
+                }
+
+                menuChoices.Add("Avsluta");
 
                 var userChoice = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
-                    .Title("[green]Välj ett alternativ:[/]")
-                    .AddChoices("Lägg till uppgift", "Markera uppgift som slutförd",  "Ändra uppgift", "Flytta uppgift", "Ta bort uppgift", "Avsluta")
-                );
+                    .Title("Vad vill du göra?")
+                    .AddChoices(menuChoices));
 
                 switch (userChoice)
                 {
-                    case "Lägg till uppgift":
+                    case "Lägg till en uppgift":
                         TaskManager.AddTask();
                         break;
-                    case "Markera uppgift som slutförd":
-                        TaskManager.MarkTaskAsComleted(); 
-                        break;
-                    case "Ändra uppgift":
-                        TaskManager.EditTask();
-                        break;
-                    case "Flytta uppgift":
-                        TaskManager.MoveTask();
-                        break;
-                    case "Ta bort uppgift":
-                        TaskManager.DeleteTask();
-                        break;                        
                     case "Avsluta":
                         AnsiConsole.MarkupLine("[red]Avslutar...[/]");
                         return;
                     default:
-                        AnsiConsole.MarkupLine("[yellow]Funktionen är ännu inte implementerad![/]");
+                        var selectedTask = TaskManager.taskList.FirstOrDefault(task => userChoice.Contains(task.Title));
+
+                        if (selectedTask != null)
+                        {
+                            HandleTaskMenu(selectedTask);
+                        }
+                        else
+                        {
+                            AnsiConsole.MarkupLine("[red]Ogiltigt val, försök igen.[/]");
+                        }
                         break;
                 }
 
-                TaskManager.JSONHandler.SaveData();
+                TaskManager.JSONHandler.SaveDataToFile();
                 Console.WriteLine("Tryck på valfri tangent för att fortsätta...");
                 Console.ReadKey();
                 Console.Clear();
+            }
+        }
+        public void HandleTaskMenu(Task selectedTask)
+        {
+            var userChoice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                .Title("Välj vad du vill göra")
+                .AddChoices("Markera uppgift som slutförd", "Ändra uppgift", "Flytta uppgift", "Ta bort uppgift", "Gå tillbaka"));
+
+            switch (userChoice)
+            {
+                case "Markera uppgift som slutförd":
+                    TaskManager.MarkTaskAsComleted(selectedTask);
+                    break;
+                case "Ändra uppgift":
+                    TaskManager.EditTask(selectedTask);
+                    break;
+                case "Flytta uppgift":
+                    TaskManager.MoveTask(selectedTask);
+                    break;
+                case "Ta bort uppgift":
+                    TaskManager.DeleteTask(selectedTask);
+                    break;
+                case "Gå tillbaka":
+                    break;
             }
         }
     }
